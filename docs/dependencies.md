@@ -1,8 +1,3 @@
----
-title: Dependencies
-description: Learn how to create feature dependencies in Toggl, ensuring that advanced features are only active when their prerequisite features are met.
----
-
 
 Feature dependencies allow you to create relationships between features, ensuring that advanced features are only active when their prerequisites are met.
 

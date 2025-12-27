@@ -1,8 +1,3 @@
----
-title: Global Context Management
-description: Learn how to use global context management in Toggl for multi-tenancy scenarios where features behave differently based on the current organizational context.
----
-
 
 ## Overview
 

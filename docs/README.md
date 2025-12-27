@@ -1,8 +1,3 @@
----
-title: Getting Started
-description: Install and configure Toggl, a powerful Laravel feature flag package with a conductor-based API. Learn the basics of creating your first feature flag.
----
-
 
 Welcome to Toggl, a powerful Laravel feature flag package with a conductor-based API for enterprise applications. This guide will help you install, configure, and create your first feature flag.
 

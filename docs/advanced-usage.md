@@ -1,8 +1,3 @@
----
-title: Advanced Usage
-description: Discover advanced Toggl features including events, custom middleware, custom drivers, caching strategies, testing helpers, and best practices for enterprise applications.
----
-
 ## Events
 
 Toggl dispatches events that you can listen to for logging, analytics, or custom behavior.

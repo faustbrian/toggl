@@ -1,8 +1,3 @@
----
-title: Variants
-description: Enable A/B testing and multi-variant experiments in Toggl by returning different values instead of just true/false, with weighted distribution and consistent hashing.
----
-
 
 Variants enable A/B testing and multi-variant experiments by returning different values instead of just true/false.
 

@@ -1,8 +1,3 @@
----
-title: Strategies
-description: Learn about Toggl's resolution strategies including boolean, time-based, percentage rollout, scheduled, and conditional strategies for controlling feature activation.
----
-
 
 Toggl supports multiple resolution strategies for feature flags, allowing you to control when and how features are activated.
 

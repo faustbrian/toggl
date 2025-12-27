@@ -1,8 +1,3 @@
----
-title: Route Middleware
-description: Protect routes with Toggl middleware based on feature activation status, ensuring certain features are active or inactive before allowing access.
----
-
 
 Toggl provides middleware to protect routes based on feature activation status. Use these to ensure certain features are active (or inactive) before allowing access to routes.
 

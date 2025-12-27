@@ -1,8 +1,3 @@
----
-title: Time Bombs
-description: Create auto-expiring features in Toggl that automatically expire after a specified date, preventing abandoned feature flags from cluttering your codebase.
----
-
 
 Time bombs are features that automatically expire after a specified date, preventing abandoned feature flags from cluttering your codebase.
 

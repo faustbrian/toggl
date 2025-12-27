@@ -1,8 +1,3 @@
----
-title: Feature Groups
-description: Manage related features together with feature groups, enabling bulk operations, membership-based access control, and simplified testing in your Laravel application.
----
-
 
 Feature groups allow you to manage related features together, enabling bulk operations, membership-based access control, and simplified testing. Groups can be stored either in configuration files (array storage) or in the database for dynamic management.
 

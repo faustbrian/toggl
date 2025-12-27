@@ -1,8 +1,3 @@
----
-title: Basic Usage
-description: Master all core Toggl operations including defining features, checking status, activating/deactivating flags, batch operations, and working with feature values in your Laravel application.
----
-
 
 This guide covers all the core operations you'll use daily with Toggl feature flags.
 

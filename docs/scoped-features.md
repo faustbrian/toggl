@@ -1,8 +1,3 @@
----
-title: Scoped Features
-description: Activate features at organizational levels that automatically apply to all matching contexts without duplicating database records in Toggl.
----
-
 
 Activate features at organizational levels (company, division, org, team) that automatically apply to all matching contexts without duplicating database records.
 

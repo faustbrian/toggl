@@ -1,8 +1,3 @@
----
-title: Snapshot Pruning
-description: Configure and automate the pruning of Toggl feature snapshots to manage database growth while maintaining audit trails and point-in-time recovery capabilities.
----
-
 
 Toggl creates feature snapshots automatically when features are activated or deactivated, providing point-in-time recovery and audit trails. Over time, these snapshots can accumulate. This guide covers how to configure and automate snapshot pruning.
 
