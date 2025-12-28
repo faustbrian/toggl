@@ -299,8 +299,6 @@ final class PennantMigrator implements Migrator
             ->where('context_id', $context->id)
             ->first();
 
-        assert($result === null || $result instanceof stdClass);
-
         return $result;
     }
 }
