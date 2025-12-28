@@ -293,12 +293,10 @@ final class PennantMigrator implements Migrator
             ? DB::table($tableName)
             : DB::connection($connection)->table($tableName);
 
-        $result = $query
+        return $query
             ->where('name', $feature)
             ->where('context_type', $context->type)
             ->where('context_id', $context->id)
             ->first();
-
-        return $result;
     }
 }
