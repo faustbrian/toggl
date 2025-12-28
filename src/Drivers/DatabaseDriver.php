@@ -17,6 +17,7 @@ use Cline\Toggl\Exceptions\ContextMustBeEloquentModelException;
 use Cline\Toggl\QueryBuilder;
 use Cline\Toggl\Support\FeatureScope;
 use Cline\Toggl\Support\TogglContext;
+use Cline\VariableKeys\Enums\PrimaryKeyType;
 use Cline\VariableKeys\Support\PrimaryKeyGenerator;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
@@ -512,9 +513,15 @@ final class DatabaseDriver implements CanListStoredFeatures, Driver
     private function insertMany(array $inserts): bool
     {
         $now = Date::now();
-        $primaryKey = PrimaryKeyGenerator::generate();
+        $primaryKeyType = Config::get('toggl.primary_key_type', 'id');
 
-        $records = array_map(function (array $insert) use ($now, $primaryKey): array {
+        assert(is_string($primaryKeyType));
+
+        $primaryKey = PrimaryKeyGenerator::generate(
+            PrimaryKeyType::from($primaryKeyType),
+        );
+
+        $records = array_map(function (array $insert) use ($now, $primaryKey, $primaryKeyType): array {
             $record = [
                 'name' => $insert['name'],
                 ...array_combine(['context_type', 'context_id'], $this->extractContextMorph($insert['context'])),
@@ -525,7 +532,9 @@ final class DatabaseDriver implements CanListStoredFeatures, Driver
 
             // Add pre-generated ID for non-auto-incrementing primary keys
             if (!$primaryKey->isAutoIncrementing()) {
-                $record['id'] = PrimaryKeyGenerator::generate()->value;
+                $record['id'] = PrimaryKeyGenerator::generate(
+                    PrimaryKeyType::from($primaryKeyType),
+                )->value;
             }
 
             return $record;

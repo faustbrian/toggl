@@ -217,8 +217,8 @@ final class FeatureManager
     /**
      * Create an instance of the database driver.
      *
-     * @param  array<string, mixed> $config The driver configuration
-     * @param  string               $name   The driver name
+     * @param  array<string, mixed>                      $config The driver configuration
+     * @param  string                                    $name   The driver name
      * @return DatabaseDriver|PennantCompatibilityDriver The created database driver instance
      */
     public function createDatabaseDriver(array $config, string $name): DatabaseDriver|PennantCompatibilityDriver
@@ -230,7 +230,7 @@ final class FeatureManager
 
         // Wrap in compatibility driver if Pennant compatibility is enabled
         if (Config::get('toggl.pennant_compatibility.enabled', false)) {
-            $driver = $this->container->make(PennantCompatibilityDriver::class, [
+            return $this->container->make(PennantCompatibilityDriver::class, [
                 'togglDriver' => $driver,
                 'pennantTable' => Config::get('toggl.pennant_compatibility.table', 'features'),
                 'connectionName' => Config::get('toggl.pennant_compatibility.connection'),

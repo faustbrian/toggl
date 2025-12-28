@@ -11,8 +11,8 @@ namespace Tests\Fixtures;
 
 use Cline\Toggl\Concerns\HasTogglContext;
 use Cline\Toggl\Contracts\TogglContextable;
-use Cline\VariableKeys\Database\Concerns\HasVariablePrimaryKey;
 use Cline\Toggl\Support\TogglContext;
+use Cline\VariableKeys\Database\Concerns\HasVariablePrimaryKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

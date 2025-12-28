@@ -11,11 +11,19 @@ namespace Tests;
 
 use Cline\Toggl\Enums\SnapshotDriver;
 use Cline\Toggl\TogglServiceProvider;
+use Cline\VariableKeys\Enums\MorphType;
+use Cline\VariableKeys\Enums\PrimaryKeyType;
+use Cline\VariableKeys\Facades\VariableKeys;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Tests\Fixtures\Organization;
+use Tests\Fixtures\SoftDeletableUser;
+use Tests\Fixtures\UlidModel;
+use Tests\Fixtures\User;
+use Tests\Fixtures\UuidModel;
 
 use function env;
 
@@ -62,6 +70,14 @@ abstract class TestCase extends BaseTestCase
      */
     protected function defineEnvironment($app): void
     {
+        // Configure database connection for testing
+        $app->make(Repository::class)->set('database.default', 'sqlite');
+        $app->make(Repository::class)->set('database.connections.sqlite', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+
         $app->make(Repository::class)->set('toggl.default', 'array');
         $app->make(Repository::class)->set('toggl.primary_key_type', env('TOGGL_PRIMARY_KEY_TYPE', 'id'));
         $app->make(Repository::class)->set('toggl.morph_type', env('TOGGL_MORPH_TYPE', 'string'));
@@ -70,6 +86,30 @@ abstract class TestCase extends BaseTestCase
         // Disable morph map enforcement for tests
         Relation::morphMap([], merge: false);
         Relation::requireMorphMap(false);
+
+        // Register models with VariableKeys
+        VariableKeys::map([
+            User::class => [
+                'primary_key_type' => PrimaryKeyType::from(env('TOGGL_PRIMARY_KEY_TYPE', 'id')),
+                'morph_type' => MorphType::from(env('TOGGL_MORPH_TYPE', 'string')),
+            ],
+            SoftDeletableUser::class => [
+                'primary_key_type' => PrimaryKeyType::from(env('TOGGL_PRIMARY_KEY_TYPE', 'id')),
+                'morph_type' => MorphType::from(env('TOGGL_MORPH_TYPE', 'string')),
+            ],
+            Organization::class => [
+                'primary_key_type' => PrimaryKeyType::from(env('TOGGL_PRIMARY_KEY_TYPE', 'id')),
+                'morph_type' => MorphType::from(env('TOGGL_MORPH_TYPE', 'string')),
+            ],
+            UuidModel::class => [
+                'primary_key_type' => PrimaryKeyType::UUID,
+                'morph_type' => MorphType::UUID,
+            ],
+            UlidModel::class => [
+                'primary_key_type' => PrimaryKeyType::ULID,
+                'morph_type' => MorphType::ULID,
+            ],
+        ]);
     }
 
     /**

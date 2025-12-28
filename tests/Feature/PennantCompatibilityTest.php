@@ -112,19 +112,16 @@ describe('Pennant Compatibility', function (): void {
         Config::set('toggl.pennant_compatibility.enabled', true);
         Config::set('toggl.pennant_compatibility.table', 'pennant_features');
 
+        // Force driver recreation
+        Toggl::forgetDriver();
+
         // Create a test user
-        $user = new class()
-        {
-            public function getKey(): int
-            {
-                return 123;
-            }
-        };
+        $user = User::factory()->create(['id' => 123]);
 
         // Insert feature for specific user in Pennant
         DB::table('pennant_features')->insert([
             'name' => 'user-feature',
-            'scope' => get_class($user).'|123',
+            'scope' => $user::class.'|123',
             'value' => json_encode(true),
             'created_at' => now(),
             'updated_at' => now(),

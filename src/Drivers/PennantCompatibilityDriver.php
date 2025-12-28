@@ -16,9 +16,12 @@ use Cline\Toggl\ValueObjects\FeatureValue;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 
-use function config;
-use function is_null;
+use function array_values;
+use function assert;
+use function is_int;
+use function is_string;
 use function json_decode;
+use function property_exists;
 
 /**
  * Laravel Pennant compatibility driver for gradual migration.
@@ -36,20 +39,21 @@ use function json_decode;
  * - toggl.pennant_compatibility.connection: Database connection for Pennant table
  *
  * @author Brian Faust <brian@cline.sh>
+ * @psalm-immutable
  */
-final class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
+final readonly class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
 {
     /**
      * Create a new Pennant compatibility driver instance.
      *
      * @param DatabaseDriver $togglDriver    The underlying Toggl database driver for writes
      * @param string         $pennantTable   The Pennant features table name
-     * @param string|null    $connectionName Database connection name for Pennant table
+     * @param null|string    $connectionName Database connection name for Pennant table
      */
     public function __construct(
-        private readonly DatabaseDriver $togglDriver,
-        private readonly string $pennantTable = 'features',
-        private readonly ?string $connectionName = null,
+        private DatabaseDriver $togglDriver,
+        private string $pennantTable = 'features',
+        private ?string $connectionName = null,
     ) {}
 
     public function define(string $feature, mixed $resolver = null): mixed
@@ -57,14 +61,20 @@ final class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
         return $this->togglDriver->define($feature, $resolver);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function defined(): array
     {
-        return $this->togglDriver->defined();
+        return array_values($this->togglDriver->defined());
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function stored(): array
     {
-        return $this->togglDriver->stored();
+        return array_values($this->togglDriver->stored());
     }
 
     /**
@@ -110,13 +120,20 @@ final class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
         $pennantResult = $this->getFromPennant($feature, $context);
 
         // Check if feature was found in Pennant (returns array with 'found' and 'value')
-        if ($pennantResult['found']) {
+        if ($pennantResult['found'] === true) {
+            /** @var mixed $value */
+            $value = $pennantResult['value'];
+
             // Wrap Pennant value in FeatureValue
-            return FeatureValue::from($pennantResult['value']);
+            return FeatureValue::from($value);
         }
 
         // Fall back to Toggl
-        return $this->togglDriver->get($feature, $context);
+        $togglValue = $this->togglDriver->get($feature, $context);
+
+        assert($togglValue instanceof FeatureValue);
+
+        return $togglValue;
     }
 
     /**
@@ -171,28 +188,35 @@ final class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
      * - scope: serialized context identifier (or null for global)
      * - value: JSON-encoded feature value
      *
-     * @param  string                                   $feature Feature name
-     * @param  TogglContext                             $context Context to check
-     * @return array{found: bool, value: mixed|null}    Result array with 'found' flag and value
+     * @param  string                                $feature Feature name
+     * @param  TogglContext                          $context Context to check
+     * @return array{found: bool, value: null|mixed} Result array with 'found' flag and value
      */
     private function getFromPennant(string $feature, TogglContext $context): array
     {
         $connection = $this->getConnection();
         $scope = $this->serializeContextForPennant($context);
 
-        $record = $connection->table($this->pennantTable)
-            ->where('name', $feature)
-            ->where(fn ($query) => is_null($scope)
-                ? $query->whereNull('scope')
-                : $query->where('scope', $scope)
-            )
-            ->first();
+        $query = $connection->table($this->pennantTable)
+            ->where('name', $feature);
+
+        if (null === $scope) {
+            $query->whereNull('scope');
+        } else {
+            $query->where('scope', $scope);
+        }
+
+        $record = $query->first();
 
         if ($record === null) {
             return ['found' => false, 'value' => null];
         }
 
         // Pennant stores values as JSON
+        if (!property_exists($record, 'value') || !is_string($record->value)) {
+            return ['found' => false, 'value' => null];
+        }
+
         $value = json_decode($record->value, associative: true);
 
         return ['found' => true, 'value' => $value];
@@ -205,7 +229,7 @@ final class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
      * For example: "App\Models\User|123"
      *
      * @param  TogglContext $context Context to serialize
-     * @return string|null  Serialized scope string, or null for global features
+     * @return null|string  Serialized scope string, or null for global features
      */
     private function serializeContextForPennant(TogglContext $context): ?string
     {
@@ -214,9 +238,13 @@ final class PennantCompatibilityDriver implements CanListStoredFeatures, Driver
             return null;
         }
 
+        $id = $context->id;
+
+        assert(is_int($id) || is_string($id));
+
         // Use type and id to create scope string
         // Format: "Type|id"
-        return $context->type.'|'.$context->id;
+        return $context->type.'|'.$id;
     }
 
     /**
