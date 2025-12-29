@@ -30,10 +30,8 @@ jobs:
           php-version: '8.5'
           coverage: ${{ matrix.laravel == '12' && 'pcov' || 'none' }}
           tools: composer:v2
-      - name: Install Laravel ${{ matrix.laravel }}
-        run: |
-          composer require "illuminate/contracts:^${{ matrix.laravel }}.0" "illuminate/database:^${{ matrix.laravel }}.0" "illuminate/events:^${{ matrix.laravel }}.0" "illuminate/support:^${{ matrix.laravel }}.0" "orchestra/testbench:${{ matrix.testbench }}" --no-update --no-interaction
-          composer update --prefer-dist --no-progress --no-interaction
+      - name: Install dependencies
+        run: composer install --no-progress --no-interaction --ignore-platform-reqs
       - run: vendor/bin/pest --coverage --min=90
 
   phpstan:
