@@ -47,6 +47,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static Conductors\GroupDeactivationConductor deactivateGroupConductor(string $groupName)
  * @method static Conductors\PermissiveConductor        defaultAllow(string|\BackedEnum|array<\BackedEnum|string> $features)
  * @method static PendingContextualFeatureInteraction   defaultDeny(string|\BackedEnum|array<\BackedEnum|string> $features)
+ * @method static mixed                                 define(string|\BackedEnum $feature, mixed $resolver = null)
+ * @method static array<int, string>                    defined()
  * @method static Conductors\FluentDefinitionConductor  definition(string|\BackedEnum $feature)
  * @method static Conductors\PermissionStyleConductor   deny(mixed $contexts)
  * @method static Conductors\DeactivationConductor      denyAccess(string|\BackedEnum|array<\BackedEnum|string> $features)
