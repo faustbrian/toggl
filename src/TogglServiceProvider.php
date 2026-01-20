@@ -87,7 +87,7 @@ final class TogglServiceProvider extends PackageServiceProvider
         $this->registerVariableKeyModels();
 
         // Register Driver based on default store config
-        $this->app->singleton(function (Container $app): Driver {
+        $this->app->singleton(Driver::class, function (Container $app): Driver {
             /** @var FeatureManager $manager */
             $manager = $app->make(FeatureManager::class);
 
@@ -95,7 +95,7 @@ final class TogglServiceProvider extends PackageServiceProvider
         });
 
         // Register SnapshotRepository based on config (conditional binding requires closure)
-        $this->app->singleton(function (Container $app): SnapshotRepository {
+        $this->app->singleton(SnapshotRepository::class, function (Container $app): SnapshotRepository {
             /** @var FeatureManager $manager */
             $manager = $app->make(FeatureManager::class);
 
