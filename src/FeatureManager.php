@@ -100,7 +100,6 @@ use function ucfirst;
  *
  * @author Brian Faust <brian@cline.sh>
  */
-#[Singleton()]
 final class FeatureManager
 {
     /**

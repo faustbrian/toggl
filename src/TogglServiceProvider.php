@@ -86,6 +86,8 @@ final class TogglServiceProvider extends PackageServiceProvider
     {
         $this->registerVariableKeyModels();
 
+        $this->app->singleton(FeatureManager::class);
+
         // Register Driver based on default store config
         $this->app->singleton(Driver::class, function (Container $app): Driver {
             /** @var FeatureManager $manager */
