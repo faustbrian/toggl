@@ -67,8 +67,8 @@ return [
         |--------------------------------------------------------------------------
         |
         | Enable Pennant compatibility mode. When true, the database driver will
-        | check Pennant's features table for reads before checking Toggl's table.
-        | All writes still go to Toggl only.
+        | check Toggl's features table first, falling back to Pennant for
+        | unmigrated records. All writes still go to Toggl only.
         |
         */
 

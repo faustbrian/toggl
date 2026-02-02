@@ -17,6 +17,7 @@ use Cline\Toggl\Exceptions\ContextMustBeEloquentModelException;
 use Cline\Toggl\QueryBuilder;
 use Cline\Toggl\Support\FeatureScope;
 use Cline\Toggl\Support\TogglContext;
+use Cline\Toggl\ValueObjects\FeatureValue;
 use Cline\VariableKeys\Enums\PrimaryKeyType;
 use Cline\VariableKeys\Support\PrimaryKeyGenerator;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -266,6 +267,40 @@ final class DatabaseDriver implements CanListStoredFeatures, Driver
         }
 
         return $value;
+    }
+
+    /**
+     * Retrieve a feature flag's value without triggering resolution.
+     *
+     * Unlike get(), this method only checks the database and does not
+     * invoke resolvers or persist new values. Returns null if the
+     * feature is not found, enabling callers to distinguish between
+     * "not found" and "found with value false".
+     *
+     * Handles expired features by deleting them and returning inactive.
+     *
+     * @param  string            $feature The feature name
+     * @param  TogglContext      $context The context to check
+     * @return null|FeatureValue The feature value, or null if not in storage
+     */
+    public function retrieveOnly(string $feature, TogglContext $context): ?FeatureValue
+    {
+        $record = $this->retrieve($feature, $context);
+
+        if (!$record instanceof Feature) {
+            return null;
+        }
+
+        // Handle expiration
+        if ($record->expires_at !== null && Date::now()->greaterThan($record->expires_at)) {
+            $this->delete($feature, $context);
+
+            return FeatureValue::from(false);
+        }
+
+        $value = json_decode($record->value, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
+
+        return FeatureValue::from($value);
     }
 
     /**

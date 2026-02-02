@@ -27,7 +27,7 @@ use function property_exists;
  * Laravel Pennant compatibility driver for gradual migration.
  *
  * This driver wraps the standard DatabaseDriver and intercepts read operations
- * to check Laravel Pennant's features table first before falling back to Toggl.
+ * to check Toggl's features table first, falling back to Pennant for unmigrated records.
  * All write operations are delegated exclusively to Toggl's storage.
  *
  * Use this during migration when you have millions of feature flags in Pennant
@@ -78,12 +78,12 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
     }
 
     /**
-     * Get multiple feature flag values, checking Pennant first.
+     * Get multiple feature flag values, checking Toggl first.
      *
      * For each feature/context pair:
-     * 1. Check Pennant's features table first
-     * 2. If found in Pennant, return that value
-     * 3. If not in Pennant, fall back to Toggl's table
+     * 1. Check Toggl's features table first (without triggering resolver)
+     * 2. If not found in Toggl, check Pennant's features table
+     * 3. If not in either, let Toggl resolve and persist
      *
      * @param  array<string, array<int, TogglContext>> $features Map of feature names to contexts
      * @return array<string, array<int, mixed>>        Resolved values
@@ -104,11 +104,12 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
     }
 
     /**
-     * Get a feature flag's value, checking Pennant first.
+     * Get a feature flag's value, checking Toggl first.
      *
-     * Read priority:
-     * 1. Check Laravel Pennant's features table
-     * 2. If not found, check Toggl's features table
+     * Read priority (inverted for migration):
+     * 1. Check Toggl's features table (without triggering resolver)
+     * 2. If not found in Toggl, check Laravel Pennant's features table
+     * 3. If not in either, let Toggl resolve and persist
      *
      * @param  string       $feature Feature name
      * @param  TogglContext $context Context for the feature
@@ -116,24 +117,25 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
      */
     public function get(string $feature, TogglContext $context): FeatureValue
     {
-        // Try Pennant first
-        $pennantResult = $this->getFromPennant($feature, $context);
+        // Try Toggl first (without triggering resolver)
+        $togglValue = $this->togglDriver->retrieveOnly($feature, $context);
 
-        // Check if feature was found in Pennant (returns array with 'found' and 'value')
-        if ($pennantResult['found'] === true) {
-            /** @var mixed $value */
-            $value = $pennantResult['value'];
-
-            // Wrap Pennant value in FeatureValue
-            return FeatureValue::from($value);
+        // If Toggl has a defined value (even false/inactive), use it
+        if ($togglValue instanceof FeatureValue) {
+            return $togglValue;
         }
 
-        // Fall back to Toggl
-        $togglValue = $this->togglDriver->get($feature, $context);
+        // Toggl has no value - check Pennant
+        $pennantResult = $this->getFromPennant($feature, $context);
 
-        assert($togglValue instanceof FeatureValue);
+        if ($pennantResult['found'] === true) {
+            return FeatureValue::from($pennantResult['value']);
+        }
 
-        return $togglValue;
+        // Neither has value - let Toggl resolve and persist
+        $resolvedValue = $this->togglDriver->get($feature, $context);
+
+        return FeatureValue::from($resolvedValue);
     }
 
     /**
