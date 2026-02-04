@@ -245,33 +245,6 @@ describe('Pennant Compatibility', function (): void {
         expect(Toggl::for($user)->active('legacy-scope-feature'))->toBeTrue();
     });
 
-    test('matches legacy namespace swap with legacy numeric id', function (): void {
-        // Enable compatibility mode
-        Config::set('toggl.pennant_compatibility.enabled', true);
-        Config::set('toggl.pennant_compatibility.table', 'pennant_features');
-
-        // Force driver recreation
-        Toggl::forgetDriver();
-
-        // Create a legacy user with ULID primary key and numeric id attribute
-        $legacy = LegacyUser::create([
-            'ulid' => '01hhe1z24gg2dnv97mm0a2zb22',
-            'id' => 78467,
-            'name' => 'Legacy User',
-        ]);
-
-        // Insert Pennant record using legacy namespace and numeric id
-        DB::table('pennant_features')->insert([
-            'name' => 'legacy-namespace-feature',
-            'scope' => 'Tests\\Fixtures\\Models\\LegacyUser|78467',
-            'value' => json_encode(true),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        expect(Toggl::for($legacy)->active('legacy-namespace-feature'))->toBeTrue();
-    });
-
     test('resolves morph alias to FQCN scope', function (): void {
         // Enable compatibility mode
         Config::set('toggl.pennant_compatibility.enabled', true);

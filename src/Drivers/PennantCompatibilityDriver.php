@@ -26,8 +26,6 @@ use function is_int;
 use function is_string;
 use function json_decode;
 use function property_exists;
-use function str_contains;
-use function str_replace;
 
 /**
  * Laravel Pennant compatibility driver for gradual migration.
@@ -276,18 +274,6 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
                 $scopes[] = $context->source::class.'|'.$legacyId;
             }
 
-            // Handle legacy namespace rename: \Model\ <-> \Models\
-            if (str_contains($context->source::class, '\\Model\\')) {
-                $scopes[] = str_replace('\\Model\\', '\\Models\\', $context->source::class).'|'.$context->source->getKey();
-                if (isset($legacyId)) {
-                    $scopes[] = str_replace('\\Model\\', '\\Models\\', $context->source::class).'|'.$legacyId;
-                }
-            } elseif (str_contains($context->source::class, '\\Models\\')) {
-                $scopes[] = str_replace('\\Models\\', '\\Model\\', $context->source::class).'|'.$context->source->getKey();
-                if (isset($legacyId)) {
-                    $scopes[] = str_replace('\\Models\\', '\\Model\\', $context->source::class).'|'.$legacyId;
-                }
-            }
         }
 
         // If the context type is a morph alias, resolve it to a class name
