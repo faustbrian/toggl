@@ -14,10 +14,14 @@ use Cline\Toggl\Contracts\Driver;
 use Cline\Toggl\Support\TogglContext;
 use Cline\Toggl\ValueObjects\FeatureValue;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
+use Laravel\Pennant\Feature as PennantFeature;
 
 use function array_values;
 use function assert;
+use function class_exists;
 use function is_int;
 use function is_string;
 use function json_decode;
@@ -197,15 +201,15 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
     private function getFromPennant(string $feature, TogglContext $context): array
     {
         $connection = $this->getConnection();
-        $scope = $this->serializeContextForPennant($context);
+        $scopes = $this->buildPennantScopes($context);
 
         $query = $connection->table($this->pennantTable)
             ->where('name', $feature);
 
-        if (null === $scope) {
+        if ($scopes === null) {
             $query->whereNull('scope');
         } else {
-            $query->where('scope', $scope);
+            $query->whereIn('scope', $scopes);
         }
 
         $record = $query->first();
@@ -225,15 +229,17 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
     }
 
     /**
-     * Serialize a context to match Pennant's scope format.
+     * Build candidate Pennant scopes for the given context.
      *
-     * Pennant typically uses "Model|id" format for scopes.
-     * For example: "App\Models\User|123"
+     * This handles:
+     * - Current Toggl context type (often morph alias when morph map is enforced)
+     * - Pennant's own serialization rules (if available)
+     * - Legacy class namespaces (e.g., \Model\ vs \Models\)
      *
-     * @param  TogglContext $context Context to serialize
-     * @return null|string  Serialized scope string, or null for global features
+     * @param  TogglContext     $context Context to serialize
+     * @return null|array<int,string> Candidate scope strings, or null for global features
      */
-    private function serializeContextForPennant(TogglContext $context): ?string
+    private function buildPennantScopes(TogglContext $context): ?array
     {
         // Global context (null id) maps to null scope
         if ($context->id === null) {
@@ -244,9 +250,37 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
 
         assert(is_int($id) || is_string($id));
 
-        // Use type and id to create scope string
-        // Format: "Type|id"
-        return $context->type.'|'.$id;
+        $scopes = [];
+
+        // Use type and id to create scope string (current Toggl context)
+        $scopes[] = $context->type.'|'.$id;
+
+        // Prefer Pennant's own serializer when available and source is a Model
+        if ($context->source instanceof Model && class_exists(PennantFeature::class)) {
+            $pennantScope = PennantFeature::serializeScope($context->source);
+
+            if ($pennantScope !== null && $pennantScope !== '__laravel_null') {
+                $scopes[] = $pennantScope;
+            }
+        }
+
+        // Add raw model class scope when source is a Model (legacy Pennant configs)
+        if ($context->source instanceof Model) {
+            $scopes[] = $context->source::class.'|'.$id;
+        }
+
+        // If the context type is a morph alias, resolve it to a class name
+        $morphedClass = Relation::getMorphedModel($context->type);
+        if (is_string($morphedClass) && $morphedClass !== '') {
+            $scopes[] = $morphedClass.'|'.$id;
+        }
+
+        // If the context type itself is a class, include it
+        if (class_exists($context->type)) {
+            $scopes[] = $context->type.'|'.$id;
+        }
+
+        return array_values(array_unique($scopes));
     }
 
     /**

@@ -10,6 +10,7 @@
 use Cline\Toggl\Drivers\DatabaseDriver;
 use Cline\Toggl\Drivers\PennantCompatibilityDriver;
 use Cline\Toggl\Toggl;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -212,6 +213,35 @@ describe('Pennant Compatibility', function (): void {
 
         // Should fall back to Pennant's value
         expect(Toggl::for($user)->active('pennant-only-feature'))->toBeTrue();
+    });
+
+    test('matches legacy Pennant scope when morph map is enforced', function (): void {
+        // Enable compatibility mode
+        Config::set('toggl.pennant_compatibility.enabled', true);
+        Config::set('toggl.pennant_compatibility.table', 'pennant_features');
+
+        // Enforce morph map to simulate application aliasing
+        Relation::enforceMorphMap([
+            'user' => User::class,
+        ]);
+
+        // Force driver recreation
+        Toggl::forgetDriver();
+
+        // Create a test user
+        $user = User::factory()->create(['id' => 78467]);
+
+        // Insert legacy Pennant record with fully-qualified class scope
+        DB::table('pennant_features')->insert([
+            'name' => 'legacy-scope-feature',
+            'scope' => User::class.'|78467',
+            'value' => json_encode(true),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Should resolve via compatibility driver despite morph map aliasing
+        expect(Toggl::for($user)->active('legacy-scope-feature'))->toBeTrue();
     });
 
     test('toggl explicit false takes priority over pennant true', function (): void {
