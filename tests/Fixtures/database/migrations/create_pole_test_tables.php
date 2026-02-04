@@ -70,6 +70,15 @@ return new class() extends Migration
             $table->ulid('id')->primary();
             $table->string('name');
         });
+
+        // Create legacy_users table for Pennant compatibility testing
+        if (!Schema::hasTable('legacy_users')) {
+            Schema::create('legacy_users', function ($table): void {
+                $table->ulid('ulid')->primary();
+                $table->unsignedBigInteger('id')->nullable(); // legacy numeric identifier
+                $table->string('name')->nullable();
+            });
+        }
     }
 
     /**
@@ -77,6 +86,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('legacy_users');
         Schema::dropIfExists('ulid_models');
         Schema::dropIfExists('uuid_models');
         Schema::dropIfExists('organizations');

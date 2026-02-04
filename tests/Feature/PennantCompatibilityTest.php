@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Tests\Fixtures\Model\LegacyUser;
 use Tests\Fixtures\User;
 
 beforeEach(function (): void {
@@ -242,6 +243,62 @@ describe('Pennant Compatibility', function (): void {
 
         // Should resolve via compatibility driver despite morph map aliasing
         expect(Toggl::for($user)->active('legacy-scope-feature'))->toBeTrue();
+    });
+
+    test('matches legacy namespace swap with legacy numeric id', function (): void {
+        // Enable compatibility mode
+        Config::set('toggl.pennant_compatibility.enabled', true);
+        Config::set('toggl.pennant_compatibility.table', 'pennant_features');
+
+        // Force driver recreation
+        Toggl::forgetDriver();
+
+        // Create a legacy user with ULID primary key and numeric id attribute
+        $legacy = LegacyUser::create([
+            'ulid' => '01hhe1z24gg2dnv97mm0a2zb22',
+            'id' => 78467,
+            'name' => 'Legacy User',
+        ]);
+
+        // Insert Pennant record using legacy namespace and numeric id
+        DB::table('pennant_features')->insert([
+            'name' => 'legacy-namespace-feature',
+            'scope' => 'Tests\\Fixtures\\Models\\LegacyUser|78467',
+            'value' => json_encode(true),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        expect(Toggl::for($legacy)->active('legacy-namespace-feature'))->toBeTrue();
+    });
+
+    test('resolves morph alias to FQCN scope', function (): void {
+        // Enable compatibility mode
+        Config::set('toggl.pennant_compatibility.enabled', true);
+        Config::set('toggl.pennant_compatibility.table', 'pennant_features');
+
+        Relation::enforceMorphMap([
+            'legacy_user' => LegacyUser::class,
+        ]);
+
+        // Force driver recreation
+        Toggl::forgetDriver();
+
+        $legacy = LegacyUser::create([
+            'ulid' => '01hhe1z24gg2dnv97mm0a2zb23',
+            'id' => 9001,
+            'name' => 'Legacy User 2',
+        ]);
+
+        DB::table('pennant_features')->insert([
+            'name' => 'morph-alias-feature',
+            'scope' => LegacyUser::class.'|'.$legacy->getKey(),
+            'value' => json_encode(true),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        expect(Toggl::for($legacy)->active('morph-alias-feature'))->toBeTrue();
     });
 
     test('toggl explicit false takes priority over pennant true', function (): void {

@@ -26,6 +26,8 @@ use function is_int;
 use function is_string;
 use function json_decode;
 use function property_exists;
+use function str_contains;
+use function str_replace;
 
 /**
  * Laravel Pennant compatibility driver for gradual migration.
@@ -264,9 +266,28 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
             }
         }
 
-        // Add raw model class scope when source is a Model (legacy Pennant configs)
+        // Add raw model class scope when source is a Model (Pennant FQCN|key)
         if ($context->source instanceof Model) {
-            $scopes[] = $context->source::class.'|'.$id;
+            $scopes[] = $context->source::class.'|'.$context->source->getKey();
+
+            // If the model has a separate numeric "id" attribute, include that too
+            $legacyId = $context->source->getAttribute('id');
+            if (is_int($legacyId) || (is_string($legacyId) && $legacyId !== '' && $legacyId !== (string) $id)) {
+                $scopes[] = $context->source::class.'|'.$legacyId;
+            }
+
+            // Handle legacy namespace rename: \Model\ <-> \Models\
+            if (str_contains($context->source::class, '\\Model\\')) {
+                $scopes[] = str_replace('\\Model\\', '\\Models\\', $context->source::class).'|'.$context->source->getKey();
+                if (isset($legacyId)) {
+                    $scopes[] = str_replace('\\Model\\', '\\Models\\', $context->source::class).'|'.$legacyId;
+                }
+            } elseif (str_contains($context->source::class, '\\Models\\')) {
+                $scopes[] = str_replace('\\Models\\', '\\Model\\', $context->source::class).'|'.$context->source->getKey();
+                if (isset($legacyId)) {
+                    $scopes[] = str_replace('\\Models\\', '\\Model\\', $context->source::class).'|'.$legacyId;
+                }
+            }
         }
 
         // If the context type is a morph alias, resolve it to a class name
