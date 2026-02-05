@@ -125,7 +125,7 @@ final class TogglServiceProvider extends PackageServiceProvider
             $blade->if(
                 'feature',
                 function (string $feature, mixed $value = null, mixed $context = null): bool {
-                    $hasValue = func_num_args() >= 2;
+                    $hasValue = $value !== null;
 
                     if ($context === null) {
                         return $hasValue
