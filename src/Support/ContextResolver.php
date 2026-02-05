@@ -13,7 +13,10 @@ use Cline\Toggl\Contracts\TogglContextable;
 use Cline\Toggl\Database\ModelRegistry;
 use Cline\Toggl\Exceptions\UnsupportedContextTypeException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
+use function is_string;
+use function is_subclass_of;
 use function resolve;
 
 /**
@@ -101,6 +104,30 @@ final class ContextResolver
         }
 
         return false;
+    }
+
+    /**
+     * Resolve a model instance from a TogglContext when possible.
+     *
+     * Returns the original source model when attached, otherwise attempts to
+     * resolve the morph type and look up by ID.
+     *
+     * @param  TogglContext $context The context to resolve
+     * @return null|Model   The resolved model or null when unavailable
+     */
+    public static function resolveModel(TogglContext $context): ?Model
+    {
+        if ($context->source instanceof Model) {
+            return $context->source;
+        }
+
+        $modelClass = Relation::getMorphedModel($context->type) ?? $context->type;
+
+        if (!is_string($modelClass) || $modelClass === '' || !is_subclass_of($modelClass, Model::class)) {
+            return null;
+        }
+
+        return $modelClass::query()->find($context->id);
     }
 
     /**
