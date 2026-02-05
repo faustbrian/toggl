@@ -2422,6 +2422,11 @@ Toggl::when('detailed-logging', function () {
 @feature('premium-badge')
     <span class="badge badge-premium">Premium</span>
 @endfeature
+
+{{-- Contextual check with explicit context --}}
+@feature('premium-badge', null, $user)
+    <span class="badge badge-premium">Premium</span>
+@endfeature
 ```
 
 ### Positive Check Directives
@@ -2430,6 +2435,12 @@ Toggl::when('detailed-logging', function () {
 
 ```blade
 @hasFeature('premium')
+    <span class="badge">Premium Member</span>
+@endhasFeature
+```
+
+```blade
+@hasFeature('premium', $user)
     <span class="badge">Premium Member</span>
 @endhasFeature
 ```
@@ -2445,10 +2456,29 @@ Toggl::when('detailed-logging', function () {
 @endhasAnyFeature
 ```
 
+```blade
+@hasAnyFeature(['beta-ui', 'new-ui', 'experimental-ui'], $user)
+    <div class="alert alert-info">
+        You're using an experimental UI.
+        <a href="/feedback">Share feedback</a>
+    </div>
+@endhasAnyFeature
+```
+
 #### @hasAllFeatures - Check if all of the given features are active
 
 ```blade
 @hasAllFeatures(['auth', 'payment', 'shipping'])
+    <button class="btn-checkout">Complete Purchase</button>
+@else
+    <div class="alert alert-warning">
+        Some features are unavailable. Please try again later.
+    </div>
+@endhasAllFeatures
+```
+
+```blade
+@hasAllFeatures(['auth', 'payment', 'shipping'], $user)
     <button class="btn-checkout">Complete Purchase</button>
 @else
     <div class="alert alert-warning">
@@ -2470,6 +2500,15 @@ Toggl::when('detailed-logging', function () {
 @endmissingFeature
 ```
 
+```blade
+@missingFeature('premium', $user)
+    <div class="upgrade-prompt">
+        <p>Upgrade to Premium for more features!</p>
+        <a href="/upgrade" class="btn">Upgrade Now</a>
+    </div>
+@endmissingFeature
+```
+
 #### @missingAnyFeature - Check if any of the given features are inactive
 
 ```blade
@@ -2480,10 +2519,26 @@ Toggl::when('detailed-logging', function () {
 @endmissingAnyFeature
 ```
 
+```blade
+@missingAnyFeature(['api-v2', 'webhooks'], $user)
+    <div class="alert alert-warning">
+        Some advanced features are not yet enabled for your account.
+    </div>
+@endmissingAnyFeature
+```
+
 #### @missingAllFeatures - Check if all of the given features are inactive
 
 ```blade
 @missingAllFeatures(['premium', 'trial'])
+    <div class="free-tier-notice">
+        You're on the free tier. Consider upgrading!
+    </div>
+@endmissingAllFeatures
+```
+
+```blade
+@missingAllFeatures(['premium', 'trial'], $user)
     <div class="free-tier-notice">
         You're on the free tier. Consider upgrading!
     </div>
@@ -2511,20 +2566,34 @@ For teams who prefer "unless" wording:
 @endunlessAllFeatures
 ```
 
+```blade
+@unlessFeature('maintenance-mode', $user)
+    <main>Normal content here</main>
+@endunlessFeature
+
+@unlessAnyFeature(['api-v2', 'webhooks'], $user)
+    <div class="legacy-api-notice">Using legacy API</div>
+@endunlessAnyFeature
+
+@unlessAllFeatures(['premium', 'trial'], $user)
+    <div class="free-tier-notice">Free tier user</div>
+@endunlessAllFeatures
+```
+
 ### Directive Reference Table
 
 | Directive | Purpose | Example |
 |-----------|---------|---------|
-| `@feature` | Single feature active (with optional value) | `@feature('premium')` or `@feature('theme', 'dark')` |
-| `@hasFeature` | Single feature active | `@hasFeature('premium')` |
-| `@hasAnyFeature` | Any feature active | `@hasAnyFeature(['a', 'b'])` |
-| `@hasAllFeatures` | All features active | `@hasAllFeatures(['a', 'b'])` |
-| `@missingFeature` | Single feature inactive | `@missingFeature('premium')` |
-| `@missingAnyFeature` | Any feature inactive | `@missingAnyFeature(['a', 'b'])` |
-| `@missingAllFeatures` | All features inactive | `@missingAllFeatures(['a', 'b'])` |
-| `@unlessFeature` | Single feature inactive (alias) | `@unlessFeature('maintenance')` |
-| `@unlessAnyFeature` | Any feature inactive (alias) | `@unlessAnyFeature(['a', 'b'])` |
-| `@unlessAllFeatures` | All features inactive (alias) | `@unlessAllFeatures(['a', 'b'])` |
+| `@feature` | Single feature active (with optional value) | `@feature('premium')`, `@feature('theme', 'dark')`, or `@feature('premium', null, $user)` |
+| `@hasFeature` | Single feature active | `@hasFeature('premium')` or `@hasFeature('premium', $user)` |
+| `@hasAnyFeature` | Any feature active | `@hasAnyFeature(['a', 'b'])` or `@hasAnyFeature(['a', 'b'], $user)` |
+| `@hasAllFeatures` | All features active | `@hasAllFeatures(['a', 'b'])` or `@hasAllFeatures(['a', 'b'], $user)` |
+| `@missingFeature` | Single feature inactive | `@missingFeature('premium')` or `@missingFeature('premium', $user)` |
+| `@missingAnyFeature` | Any feature inactive | `@missingAnyFeature(['a', 'b'])` or `@missingAnyFeature(['a', 'b'], $user)` |
+| `@missingAllFeatures` | All features inactive | `@missingAllFeatures(['a', 'b'])` or `@missingAllFeatures(['a', 'b'], $user)` |
+| `@unlessFeature` | Single feature inactive (alias) | `@unlessFeature('maintenance')` or `@unlessFeature('maintenance', $user)` |
+| `@unlessAnyFeature` | Any feature inactive (alias) | `@unlessAnyFeature(['a', 'b'])` or `@unlessAnyFeature(['a', 'b'], $user)` |
+| `@unlessAllFeatures` | All features inactive (alias) | `@unlessAllFeatures(['a', 'b'])` or `@unlessAllFeatures(['a', 'b'], $user)` |
 
 ### Nested Directives
 

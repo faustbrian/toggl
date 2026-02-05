@@ -124,57 +124,95 @@ final class TogglServiceProvider extends PackageServiceProvider
             // Usage: @feature('new-ui') or @feature('theme', 'dark')
             $blade->if(
                 'feature',
-                fn (string $feature, mixed $value = null): bool => func_num_args() === 2
-                    ? Toggl::value($feature) === $value
-                    : Toggl::active($feature),
+                function (string $feature, mixed $value = null, mixed $context = null): bool {
+                    $hasValue = func_num_args() >= 2;
+
+                    if ($context === null) {
+                        return $hasValue
+                            ? Toggl::value($feature) === $value
+                            : Toggl::active($feature);
+                    }
+
+                    return $hasValue
+                        ? Toggl::for($context)->value($feature) === $value
+                        : Toggl::for($context)->active($feature);
+                },
             );
 
             // Positive checks - hasFeature variants
             // @hasFeature('premium') - Check if a single feature is active
-            $blade->if('hasFeature', fn (string $feature): bool => Toggl::active($feature));
+            // @hasFeature('premium', $user) - Check if a feature is active for a specific context
+            $blade->if(
+                'hasFeature',
+                fn (string $feature, mixed $context = null): bool => $context === null
+                    ? Toggl::active($feature)
+                    : Toggl::for($context)->active($feature),
+            );
 
             // @hasAnyFeature(['premium', 'trial']) - Check if any of the given features are active
-            $blade->if('hasAnyFeature', function (array $features): bool {
+            $blade->if('hasAnyFeature', function (array $features, mixed $context = null): bool {
                 /** @var array<string> $features */
-                return Toggl::someAreActive($features);
+                return $context === null
+                    ? Toggl::someAreActive($features)
+                    : Toggl::for($context)->someAreActive($features);
             });
 
             // @hasAllFeatures(['api-v2', 'webhooks']) - Check if all of the given features are active
-            $blade->if('hasAllFeatures', function (array $features): bool {
+            $blade->if('hasAllFeatures', function (array $features, mixed $context = null): bool {
                 /** @var array<string> $features */
-                return Toggl::allAreActive($features);
+                return $context === null
+                    ? Toggl::allAreActive($features)
+                    : Toggl::for($context)->allAreActive($features);
             });
 
             // Negative checks - missingFeature variants
             // @missingFeature('premium') - Check if a single feature is inactive
-            $blade->if('missingFeature', fn (string $feature): bool => Toggl::inactive($feature));
+            $blade->if(
+                'missingFeature',
+                fn (string $feature, mixed $context = null): bool => $context === null
+                    ? Toggl::inactive($feature)
+                    : Toggl::for($context)->inactive($feature),
+            );
 
             // @missingAnyFeature(['premium', 'trial']) - Check if any of the given features are inactive
-            $blade->if('missingAnyFeature', function (array $features): bool {
+            $blade->if('missingAnyFeature', function (array $features, mixed $context = null): bool {
                 /** @var array<string> $features */
-                return Toggl::someAreInactive($features);
+                return $context === null
+                    ? Toggl::someAreInactive($features)
+                    : Toggl::for($context)->someAreInactive($features);
             });
 
             // @missingAllFeatures(['api-v2', 'webhooks']) - Check if all of the given features are inactive
-            $blade->if('missingAllFeatures', function (array $features): bool {
+            $blade->if('missingAllFeatures', function (array $features, mixed $context = null): bool {
                 /** @var array<string> $features */
-                return Toggl::allAreInactive($features);
+                return $context === null
+                    ? Toggl::allAreInactive($features)
+                    : Toggl::for($context)->allAreInactive($features);
             });
 
             // Unless variants (alternative naming for negative checks)
             // @unlessFeature('premium') - Same as @missingFeature
-            $blade->if('unlessFeature', fn (string $feature): bool => Toggl::inactive($feature));
+            $blade->if(
+                'unlessFeature',
+                fn (string $feature, mixed $context = null): bool => $context === null
+                    ? Toggl::inactive($feature)
+                    : Toggl::for($context)->inactive($feature),
+            );
 
             // @unlessAnyFeature(['premium', 'trial']) - Same as @missingAnyFeature
-            $blade->if('unlessAnyFeature', function (array $features): bool {
+            $blade->if('unlessAnyFeature', function (array $features, mixed $context = null): bool {
                 /** @var array<string> $features */
-                return Toggl::someAreInactive($features);
+                return $context === null
+                    ? Toggl::someAreInactive($features)
+                    : Toggl::for($context)->someAreInactive($features);
             });
 
             // @unlessAllFeatures(['api-v2', 'webhooks']) - Same as @missingAllFeatures
-            $blade->if('unlessAllFeatures', function (array $features): bool {
+            $blade->if('unlessAllFeatures', function (array $features, mixed $context = null): bool {
                 /** @var array<string> $features */
-                return Toggl::allAreInactive($features);
+                return $context === null
+                    ? Toggl::allAreInactive($features)
+                    : Toggl::for($context)->allAreInactive($features);
             });
         });
 

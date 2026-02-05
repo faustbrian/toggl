@@ -286,6 +286,30 @@ describe('TogglServiceProvider Configuration', function (): void {
                 // Assert
                 expect($result)->toBeFalse();
             });
+
+            test('feature directive accepts explicit context for active checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('feature', 'premium', null, $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
+
+            test('feature directive accepts explicit context for value checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-2', 'user');
+                Toggl::activate('theme')->withValue('dark')->for($context);
+
+                // Act
+                $result = Blade::check('feature', 'theme', 'dark', $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
         });
 
         describe('@hasFeature directive', function (): void {
@@ -309,6 +333,18 @@ describe('TogglServiceProvider Configuration', function (): void {
                 // Assert
                 expect($result)->toBeFalse();
             });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('organizations')->for($context);
+
+                // Act
+                $result = Blade::check('hasFeature', 'organizations', $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
         });
 
         describe('@hasAnyFeature directive', function (): void {
@@ -331,6 +367,18 @@ describe('TogglServiceProvider Configuration', function (): void {
 
                 // Assert
                 expect($result)->toBeFalse();
+            });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('hasAnyFeature', ['premium', 'trial'], $context);
+
+                // Assert
+                expect($result)->toBeTrue();
             });
         });
 
@@ -356,6 +404,18 @@ describe('TogglServiceProvider Configuration', function (): void {
                 // Assert
                 expect($result)->toBeFalse();
             });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate(['api-v2', 'webhooks'])->for($context);
+
+                // Act
+                $result = Blade::check('hasAllFeatures', ['api-v2', 'webhooks'], $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
         });
 
         describe('@missingFeature directive', function (): void {
@@ -375,6 +435,18 @@ describe('TogglServiceProvider Configuration', function (): void {
 
                 // Act
                 $result = Blade::check('missingFeature', 'premium');
+
+                // Assert
+                expect($result)->toBeFalse();
+            });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('missingFeature', 'premium', $context);
 
                 // Assert
                 expect($result)->toBeFalse();
@@ -403,6 +475,18 @@ describe('TogglServiceProvider Configuration', function (): void {
                 // Assert
                 expect($result)->toBeFalse();
             });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('missingAnyFeature', ['premium', 'trial'], $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
         });
 
         describe('@missingAllFeatures directive', function (): void {
@@ -426,6 +510,18 @@ describe('TogglServiceProvider Configuration', function (): void {
                 // Assert
                 expect($result)->toBeFalse();
             });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('missingAllFeatures', ['premium', 'trial'], $context);
+
+                // Assert
+                expect($result)->toBeFalse();
+            });
         });
 
         describe('@unlessFeature directive', function (): void {
@@ -445,6 +541,18 @@ describe('TogglServiceProvider Configuration', function (): void {
 
                 // Act
                 $result = Blade::check('unlessFeature', 'premium');
+
+                // Assert
+                expect($result)->toBeFalse();
+            });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('unlessFeature', 'premium', $context);
 
                 // Assert
                 expect($result)->toBeFalse();
@@ -473,6 +581,18 @@ describe('TogglServiceProvider Configuration', function (): void {
                 // Assert
                 expect($result)->toBeFalse();
             });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('unlessAnyFeature', ['premium', 'trial'], $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
         });
 
         describe('@unlessAllFeatures directive', function (): void {
@@ -492,6 +612,18 @@ describe('TogglServiceProvider Configuration', function (): void {
 
                 // Act
                 $result = Blade::check('unlessAllFeatures', ['premium', 'trial']);
+
+                // Assert
+                expect($result)->toBeFalse();
+            });
+
+            test('accepts an explicit context for feature checks', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-1', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('unlessAllFeatures', ['premium', 'trial'], $context);
 
                 // Assert
                 expect($result)->toBeFalse();
