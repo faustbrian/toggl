@@ -299,6 +299,18 @@ describe('TogglServiceProvider Configuration', function (): void {
                 expect($result)->toBeTrue();
             });
 
+            test('feature directive treats null value as active check with explicit context', function (): void {
+                // Arrange
+                $context = TogglContext::simple('user-null', 'user');
+                Toggl::activate('premium')->for($context);
+
+                // Act
+                $result = Blade::check('feature', 'premium', null, $context);
+
+                // Assert
+                expect($result)->toBeTrue();
+            });
+
             test('feature directive accepts explicit context for value checks', function (): void {
                 // Arrange
                 $context = TogglContext::simple('user-2', 'user');

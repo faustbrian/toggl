@@ -9,7 +9,9 @@
 
 namespace Cline\Toggl\Events;
 
+use Cline\Toggl\Support\ContextResolver;
 use Cline\Toggl\Support\TogglContext;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Event fired when an undefined feature is resolved.
@@ -35,4 +37,14 @@ final readonly class UnknownFeatureResolved
         public string $feature,
         public TogglContext $context,
     ) {}
+
+    /**
+     * Resolve the underlying model from the context when possible.
+     *
+     * @return null|Model The resolved model instance, or null if unavailable
+     */
+    public function toModel(): ?Model
+    {
+        return ContextResolver::resolveModel($this->context);
+    }
 }
