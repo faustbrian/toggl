@@ -15,9 +15,9 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Test fixture model with ULID primary key and legacy numeric id attribute.
  *
- * @property string $ulid Primary ULID key
- * @property null|int $id Legacy numeric identifier
+ * @property null|int    $id   Legacy numeric identifier
  * @property null|string $name
+ * @property string      $ulid Primary ULID key
  */
 final class LegacyUser extends Model
 {
@@ -25,13 +25,13 @@ final class LegacyUser extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+
     protected $table = 'legacy_users';
 
     protected $primaryKey = 'ulid';
 
     protected $keyType = 'string';
-
-    public $incrementing = false;
 
     protected $fillable = ['ulid', 'id', 'name'];
 }

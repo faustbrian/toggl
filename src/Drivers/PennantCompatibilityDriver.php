@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Laravel\Pennant\Feature as PennantFeature;
 
+use function array_unique;
 use function array_values;
 use function assert;
 use function class_exists;
@@ -236,8 +237,8 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
      * - Pennant's own serialization rules (if available)
      * - Legacy class namespaces (e.g., \Model\ vs \Models\)
      *
-     * @param  TogglContext     $context Context to serialize
-     * @return null|array<int,string> Candidate scope strings, or null for global features
+     * @param  TogglContext            $context Context to serialize
+     * @return null|array<int, string> Candidate scope strings, or null for global features
      */
     private function buildPennantScopes(TogglContext $context): ?array
     {
@@ -270,14 +271,15 @@ final readonly class PennantCompatibilityDriver implements CanListStoredFeatures
 
             // If the model has a separate numeric "id" attribute, include that too
             $legacyId = $context->source->getAttribute('id');
+
             if (is_int($legacyId) || (is_string($legacyId) && $legacyId !== '' && $legacyId !== (string) $id)) {
                 $scopes[] = $context->source::class.'|'.$legacyId;
             }
-
         }
 
         // If the context type is a morph alias, resolve it to a class name
         $morphedClass = Relation::getMorphedModel($context->type);
+
         if (is_string($morphedClass) && $morphedClass !== '') {
             $scopes[] = $morphedClass.'|'.$id;
         }

@@ -230,7 +230,7 @@ describe('Pennant Compatibility', function (): void {
         Toggl::forgetDriver();
 
         // Create a test user
-        $user = User::factory()->create(['id' => 78467]);
+        $user = User::factory()->create(['id' => 78_467]);
 
         // Insert legacy Pennant record with fully-qualified class scope
         DB::table('pennant_features')->insert([
@@ -257,9 +257,9 @@ describe('Pennant Compatibility', function (): void {
         // Force driver recreation
         Toggl::forgetDriver();
 
-        $legacy = LegacyUser::create([
+        $legacy = LegacyUser::query()->create([
             'ulid' => '01hhe1z24gg2dnv97mm0a2zb23',
-            'id' => 9001,
+            'id' => 9_001,
             'name' => 'Legacy User 2',
         ]);
 
