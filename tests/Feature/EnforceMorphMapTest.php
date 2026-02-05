@@ -100,6 +100,23 @@ describe('enforceMorphMap Compatibility', function (): void {
             ->and($context->type)->not->toBe(User::class);
     });
 
+    test('ContextResolver resolves model from morph alias and id', function (): void {
+        // Arrange
+        Relation::enforceMorphMap([
+            'user' => User::class,
+        ]);
+
+        $user = User::query()->create(['name' => 'Morphed', 'email' => 'morphed@example.com']);
+        $context = ContextResolver::resolve($user);
+
+        // Act
+        $model = ContextResolver::resolveModel($context);
+
+        // Assert
+        expect($model)->toBeInstanceOf(User::class)
+            ->and($model?->getKey())->toBe($user->getKey());
+    });
+
     test('retrieves features correctly with morph map aliases', function (): void {
         // Arrange
         Relation::enforceMorphMap([
