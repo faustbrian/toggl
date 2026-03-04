@@ -43,7 +43,7 @@ final readonly class UnknownFeatureResolved
      *
      * @return null|Model The resolved model instance, or null if unavailable
      */
-    public function resolveContextModel(): ?Model
+    public function toModel(): ?Model
     {
         return ContextResolver::resolveModel($this->context);
     }

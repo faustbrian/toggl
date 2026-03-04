@@ -30,7 +30,7 @@ describe('Feature Events Model Resolution', function (): void {
 
         $event = new FeatureActivated('premium', true, $context);
 
-        expect($event->resolveContextModel())->toBe($user);
+        expect($event->toModel())->toBe($user);
     });
 
     test('FeatureDeactivated resolves model from morph alias and id', function (): void {
@@ -46,8 +46,8 @@ describe('Feature Events Model Resolution', function (): void {
 
         $event = new FeatureDeactivated('premium', $context);
 
-        expect($event->resolveContextModel())->toBeInstanceOf(User::class)
-            ->and($event->resolveContextModel()?->getKey())->toBe($user->getKey());
+        expect($event->toModel())->toBeInstanceOf(User::class)
+            ->and($event->toModel()?->getKey())->toBe($user->getKey());
     });
 
     test('UnknownFeatureResolved returns null when model cannot be resolved', function (): void {
@@ -55,6 +55,6 @@ describe('Feature Events Model Resolution', function (): void {
 
         $event = new UnknownFeatureResolved('unknown-feature', $context);
 
-        expect($event->resolveContextModel())->toBeNull();
+        expect($event->toModel())->toBeNull();
     });
 });
