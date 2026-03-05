@@ -9,6 +9,9 @@
 
 namespace Cline\Toggl\Exceptions;
 
+use Facade\IgnitionContracts\BaseSolution;
+use Facade\IgnitionContracts\ProvidesSolution;
+use Facade\IgnitionContracts\Solution;
 use InvalidArgumentException;
 
 /**
@@ -21,4 +24,17 @@ use InvalidArgumentException;
  *
  * @author Brian Faust <brian@cline.sh>
  */
-abstract class InvalidStrategyDataException extends InvalidArgumentException implements TogglException {}
+abstract class InvalidStrategyDataException extends InvalidArgumentException implements ProvidesSolution, TogglException
+{
+    public function getSolution(): Solution
+    {
+        /** @var BaseSolution $solution */
+        $solution = BaseSolution::create('Review package usage and configuration.');
+
+        return $solution
+            ->setSolutionDescription('Exception: '.$this->getMessage())
+            ->setDocumentationLinks([
+                'Package documentation' => 'https://github.com/cline/toggl',
+            ]);
+    }
+}
