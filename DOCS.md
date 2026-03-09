@@ -1,17 +1,17 @@
 ## Table of Contents
 
-1. [Getting Started](#doc-docs-readme) (`docs/README.md`)
-2. [Basic Usage](#doc-docs-basic-usage) (`docs/basic-usage.md`)
-3. [Strategies](#doc-docs-strategies) (`docs/strategies.md`)
-4. [Time Bombs](#doc-docs-time-bombs) (`docs/time-bombs.md`)
-5. [Feature Groups](#doc-docs-feature-groups) (`docs/feature-groups.md`)
-6. [Dependencies](#doc-docs-dependencies) (`docs/dependencies.md`)
-7. [Variants](#doc-docs-variants) (`docs/variants.md`)
-8. [Advanced Usage](#doc-docs-advanced-usage) (`docs/advanced-usage.md`)
-9. [Middleware](#doc-docs-middleware) (`docs/middleware.md`)
-10. [Scope Context](#doc-docs-scope-context) (`docs/scope-context.md`)
-11. [Scoped Features](#doc-docs-scoped-features) (`docs/scoped-features.md`)
-12. [Snapshot Pruning](#doc-docs-snapshot-pruning) (`docs/snapshot-pruning.md`)
+1. [Getting Started](#doc-docs-readme)
+2. [Basic Usage](#doc-docs-basic-usage)
+3. [Strategies](#doc-docs-strategies)
+4. [Time Bombs](#doc-docs-time-bombs)
+5. [Feature Groups](#doc-docs-feature-groups)
+6. [Dependencies](#doc-docs-dependencies)
+7. [Variants](#doc-docs-variants)
+8. [Advanced Usage](#doc-docs-advanced-usage)
+9. [Middleware](#doc-docs-middleware)
+10. [Scope Context](#doc-docs-scope-context)
+11. [Scoped Features](#doc-docs-scoped-features)
+12. [Snapshot Pruning](#doc-docs-snapshot-pruning)
 <a id="doc-docs-readme"></a>
 
 
