@@ -19,14 +19,14 @@ composer require cline/toggl
 
 ## Documentation
 
-- **[Getting Started](cookbook/getting-started.md)** - Installation, configuration, and first steps
-- **[Basic Usage](cookbook/basic-usage.md)** - Core feature flag operations
-- **[Strategies](cookbook/strategies.md)** - Boolean, time-based, percentage, scheduled, and conditional strategies
-- **[Time Bombs](cookbook/time-bombs.md)** - Auto-expiring features with warnings
-- **[Feature Groups](cookbook/feature-groups.md)** - Managing related features together
-- **[Dependencies](cookbook/dependencies.md)** - Feature requirements and relationships
-- **[Variants](cookbook/variants.md)** - A/B testing with weighted distribution
-- **[Advanced Usage](cookbook/advanced-usage.md)** - Events, commands, and advanced patterns
+- **[Getting Started](DOCS.md#doc-docs-readme)** - Installation, configuration, and first steps
+- **[Basic Usage](DOCS.md#doc-docs-basic-usage)** - Core feature flag operations
+- **[Strategies](DOCS.md#doc-docs-strategies)** - Boolean, time-based, percentage, scheduled, and conditional strategies
+- **[Time Bombs](DOCS.md#doc-docs-time-bombs)** - Auto-expiring features with warnings
+- **[Feature Groups](DOCS.md#doc-docs-feature-groups)** - Managing related features together
+- **[Dependencies](DOCS.md#doc-docs-dependencies)** - Feature requirements and relationships
+- **[Variants](DOCS.md#doc-docs-variants)** - A/B testing with weighted distribution
+- **[Advanced Usage](DOCS.md#doc-docs-advanced-usage)** - Events, commands, and advanced patterns
 
 ## Change log
 

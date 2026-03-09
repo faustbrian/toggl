@@ -1,17 +1,19 @@
 ## Table of Contents
 
-1. Getting Started (`docs/README.md`)
-2. Basic Usage (`docs/basic-usage.md`)
-3. Strategies (`docs/strategies.md`)
-4. Time Bombs (`docs/time-bombs.md`)
-5. Feature Groups (`docs/feature-groups.md`)
-6. Dependencies (`docs/dependencies.md`)
-7. Variants (`docs/variants.md`)
-8. Advanced Usage (`docs/advanced-usage.md`)
-9. Middleware (`docs/middleware.md`)
-10. Scope Context (`docs/scope-context.md`)
-11. Scoped Features (`docs/scoped-features.md`)
-12. Snapshot Pruning (`docs/snapshot-pruning.md`)
+1. [Getting Started](#doc-docs-readme) (`docs/README.md`)
+2. [Basic Usage](#doc-docs-basic-usage) (`docs/basic-usage.md`)
+3. [Strategies](#doc-docs-strategies) (`docs/strategies.md`)
+4. [Time Bombs](#doc-docs-time-bombs) (`docs/time-bombs.md`)
+5. [Feature Groups](#doc-docs-feature-groups) (`docs/feature-groups.md`)
+6. [Dependencies](#doc-docs-dependencies) (`docs/dependencies.md`)
+7. [Variants](#doc-docs-variants) (`docs/variants.md`)
+8. [Advanced Usage](#doc-docs-advanced-usage) (`docs/advanced-usage.md`)
+9. [Middleware](#doc-docs-middleware) (`docs/middleware.md`)
+10. [Scope Context](#doc-docs-scope-context) (`docs/scope-context.md`)
+11. [Scoped Features](#doc-docs-scoped-features) (`docs/scoped-features.md`)
+12. [Snapshot Pruning](#doc-docs-snapshot-pruning) (`docs/snapshot-pruning.md`)
+<a id="doc-docs-readme"></a>
+
 
 Welcome to Toggl, a powerful Laravel feature flag package with a conductor-based API for enterprise applications. This guide will help you install, configure, and create your first feature flag.
 
@@ -318,13 +320,15 @@ Toggl::define('debug-toolbar', function () {
 
 Now that you have Toggl installed and understand the basics, explore more advanced features:
 
-- **[Basic Usage](basic-usage.md)** - Learn all core operations
-- **[Strategies](strategies.md)** - Time-based, percentage, and conditional strategies
-- **[Time Bombs](time-bombs.md)** - Auto-expiring features
-- **[Feature Groups](feature-groups.md)** - Manage related flags together
-- **[Dependencies](dependencies.md)** - Create feature requirements
-- **[Variants](variants.md)** - A/B testing with weighted distribution
-- **[Advanced Usage](advanced-usage.md)** - Events, custom drivers, and more
+- **[Basic Usage](#doc-docs-basic-usage)** - Learn all core operations
+- **[Strategies](#doc-docs-strategies)** - Time-based, percentage, and conditional strategies
+- **[Time Bombs](#doc-docs-time-bombs)** - Auto-expiring features
+- **[Feature Groups](#doc-docs-feature-groups)** - Manage related flags together
+- **[Dependencies](#doc-docs-dependencies)** - Create feature requirements
+- **[Variants](#doc-docs-variants)** - A/B testing with weighted distribution
+- **[Advanced Usage](#doc-docs-advanced-usage)** - Events, custom drivers, and more
+
+<a id="doc-docs-basic-usage"></a>
 
 
 This guide covers all the core operations you'll use daily with Toggl feature flags.
@@ -3144,10 +3148,12 @@ Toggl::sync($user)->groups(['premium']);
 
 ## Next Steps
 
-- **[Strategies](strategies.md)** - Learn about time-based, percentage, and conditional strategies
-- **[Time Bombs](time-bombs.md)** - Set expiration dates on features
-- **[Feature Groups](feature-groups.md)** - Manage related features together
-- **[Variants](variants.md)** - Implement A/B testing
+- **[Strategies](#doc-docs-strategies)** - Learn about time-based, percentage, and conditional strategies
+- **[Time Bombs](#doc-docs-time-bombs)** - Set expiration dates on features
+- **[Feature Groups](#doc-docs-feature-groups)** - Manage related features together
+- **[Variants](#doc-docs-variants)** - Implement A/B testing
+
+<a id="doc-docs-strategies"></a>
 
 
 Toggl supports multiple resolution strategies for feature flags, allowing you to control when and how features are activated.
@@ -3316,9 +3322,11 @@ Toggl::define('eu-features')
 
 ## Next Steps
 
-- [Time Bombs](time-bombs.md) - Auto-expiring features
-- [Dependencies](dependencies.md) - Feature requirements
-- [Variants](variants.md) - A/B testing
+- [Time Bombs](#doc-docs-time-bombs) - Auto-expiring features
+- [Dependencies](#doc-docs-dependencies) - Feature requirements
+- [Variants](#doc-docs-variants) - A/B testing
+
+<a id="doc-docs-time-bombs"></a>
 
 
 Time bombs are features that automatically expire after a specified date, preventing abandoned feature flags from cluttering your codebase.
@@ -3546,9 +3554,11 @@ Toggl::define('special-pricing')->expiresAt('2025-01-01');
 
 ## Next Steps
 
-- [Feature Groups](feature-groups.md) - Managing related features
-- [Dependencies](dependencies.md) - Feature requirements
-- [Advanced Usage](advanced-usage.md) - Commands and automation
+- [Feature Groups](#doc-docs-feature-groups) - Managing related features
+- [Dependencies](#doc-docs-dependencies) - Feature requirements
+- [Advanced Usage](#doc-docs-advanced-usage) - Commands and automation
+
+<a id="doc-docs-feature-groups"></a>
 
 
 Feature groups allow you to manage related features together, enabling bulk operations, membership-based access control, and simplified testing. Groups can be stored either in configuration files (array storage) or in the database for dynamic management.
@@ -4134,9 +4144,11 @@ Toggl::groups()->define('analytics-suite', [
 
 ## Next Steps
 
-- [Dependencies](dependencies.md) - Feature requirements
-- [Variants](variants.md) - A/B testing
-- [Advanced Usage](advanced-usage.md) - Automation and commands
+- [Dependencies](#doc-docs-dependencies) - Feature requirements
+- [Variants](#doc-docs-variants) - A/B testing
+- [Advanced Usage](#doc-docs-advanced-usage) - Automation and commands
+
+<a id="doc-docs-dependencies"></a>
 
 
 Feature dependencies allow you to create relationships between features, ensuring that advanced features are only active when their prerequisites are met.
@@ -4428,8 +4440,10 @@ Toggl::active('dependent'); // true
 
 ## Next Steps
 
-- [Variants](variants.md) - A/B testing and value variants
-- [Advanced Usage](advanced-usage.md) - Events, middleware, and commands
+- [Variants](#doc-docs-variants) - A/B testing and value variants
+- [Advanced Usage](#doc-docs-advanced-usage) - Events, middleware, and commands
+
+<a id="doc-docs-variants"></a>
 
 
 Variants enable A/B testing and multi-variant experiments by returning different values instead of just true/false.
@@ -4774,9 +4788,11 @@ test('variant distribution is roughly correct', function () {
 
 ## Next Steps
 
-- [Advanced Usage](advanced-usage.md) - Events, middleware, and commands
-- [Basic Usage](basic-usage.md) - Core operations
-- [Strategies](strategies.md) - Different resolution strategies
+- [Advanced Usage](#doc-docs-advanced-usage) - Events, middleware, and commands
+- [Basic Usage](#doc-docs-basic-usage) - Core operations
+- [Strategies](#doc-docs-strategies) - Different resolution strategies
+
+<a id="doc-docs-advanced-usage"></a>
 
 ## Events
 
@@ -5157,9 +5173,11 @@ protected function schedule(Schedule $schedule): void
 
 ## Next Steps
 
-- [Getting Started](getting-started.md) - Installation and setup
-- [Basic Usage](basic-usage.md) - Core operations
-- [Strategies](strategies.md) - Resolution strategies
+- [Getting Started](#) - Installation and setup
+- [Basic Usage](#doc-docs-basic-usage) - Core operations
+- [Strategies](#doc-docs-strategies) - Resolution strategies
+
+<a id="doc-docs-middleware"></a>
 
 
 Toggl provides middleware to protect routes based on feature activation status. Use these to ensure certain features are active (or inactive) before allowing access to routes.
@@ -5416,6 +5434,8 @@ Toggl::activateForEveryone('public-feature');
 // Or define with a default value
 Toggl::define('public-feature', true);
 ```
+
+<a id="doc-docs-scope-context"></a>
 
 
 ## Overview
@@ -5766,6 +5786,8 @@ Toggl::for($user)->active('feature');
 
 This provides better separation of concerns and more consistent behavior across your application.
 
+<a id="doc-docs-scoped-features"></a>
+
 
 Activate features at organizational levels (company, division, org, team) that automatically apply to all matching contexts without duplicating database records.
 
@@ -5995,6 +6017,8 @@ Toggl::for($standardUser)->withScopes()->active('premium-analytics'); // false
 | **Kind Matching** | The `kind` parameter must match between activation and context |
 | **Explicit withScopes()** | Must call `withScopes()` to enable scoped resolution |
 
+<a id="doc-docs-snapshot-pruning"></a>
+
 
 Toggl creates feature snapshots automatically when features are activated or deactivated, providing point-in-time recovery and audit trails. Over time, these snapshots can accumulate. This guide covers how to configure and automate snapshot pruning.
 
@@ -6126,5 +6150,5 @@ The prune command uses chunked queries to handle large numbers of snapshots effi
 
 ## See Also
 
-- [Advanced Usage](advanced-usage.md) - Events and middleware
-- [Getting Started](getting-started.md) - Initial setup
+- [Advanced Usage](#doc-docs-advanced-usage) - Events and middleware
+- [Getting Started](#) - Initial setup
