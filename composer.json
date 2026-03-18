@@ -24,7 +24,7 @@
         "laravel/octane": "^2.14.0",
         "laravel/pennant": "^1.20.0",
         "orchestra/testbench": "^8.0 || ^9.0 || ^10.9",
-        "symfony/var-dumper": "^6.0 || ^7.4.6",
+        "symfony/var-dumper": "^6.0 || ^7.4.6 || ^8.0",
         "tomasvotruba/lines": "^1.2",
         "ylsideas/feature-flags": "^3.0.2"
     },
