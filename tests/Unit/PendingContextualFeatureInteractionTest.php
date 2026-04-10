@@ -9,6 +9,7 @@
 
 use Cline\Toggl\Support\TogglContext;
 use Cline\Toggl\Toggl;
+use Cline\Toggl\ValueObjects\FeatureValue;
 
 /**
  * Test suite for PendingContextualFeatureInteraction functionality.
@@ -30,6 +31,18 @@ describe('PendingContextualFeatureInteraction', function (): void {
 
             // Assert
             expect($result)->toBe('test-value');
+        });
+
+        test('get returns feature value for single context', function (): void {
+            // Arrange
+            Toggl::define('test-feature', fn (): string => 'test-value');
+
+            // Act
+            $result = Toggl::for(TogglContext::simple('user1', 'test'))->get('test-feature');
+
+            // Assert
+            expect($result)->toBeInstanceOf(FeatureValue::class)
+                ->and($result->toValue())->toBe('test-value');
         });
 
         test('values returns multiple feature values for single context', function (): void {

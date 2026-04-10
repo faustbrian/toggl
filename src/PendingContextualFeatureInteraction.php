@@ -223,6 +223,29 @@ final class PendingContextualFeatureInteraction
     }
 
     /**
+     * Get the raw feature state for a single feature.
+     *
+     * Retrieves the full FeatureValue object for a single feature. This can
+     * only be used when a single context is set and is useful for callers that
+     * need to distinguish explicit inactive values from undefined values.
+     *
+     * @param  string|BackedEnum $feature The feature name or enum to retrieve
+     * @return FeatureValue               The resolved feature state object
+     */
+    public function get(string|BackedEnum $feature): FeatureValue
+    {
+        throw_if(count($this->getContexts()) > 1, CannotRetrieveValuesForMultipleContextsException::create());
+
+        $feature = $this->normalizeFeature($feature);
+
+        if (!$this->useScopes) {
+            $this->loadMissing([$feature]);
+        }
+
+        return $this->getFeatureValue($feature, $this->getContexts()[0]);
+    }
+
+    /**
      * Get the value of a feature flag.
      *
      * Retrieves the resolved value for a single feature. Can only be used when
@@ -236,9 +259,7 @@ final class PendingContextualFeatureInteraction
      */
     public function value(string|BackedEnum $feature): mixed
     {
-        $feature = $this->normalizeFeature($feature);
-
-        return head($this->values([$feature]));
+        return $this->get($feature)->toValue();
     }
 
     /**
