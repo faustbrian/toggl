@@ -229,8 +229,8 @@ final class PendingContextualFeatureInteraction
      * only be used when a single context is set and is useful for callers that
      * need to distinguish explicit inactive values from undefined values.
      *
-     * @param  string|BackedEnum $feature The feature name or enum to retrieve
-     * @return FeatureValue               The resolved feature state object
+     * @param  BackedEnum|string $feature The feature name or enum to retrieve
+     * @return FeatureValue      The resolved feature state object
      */
     public function get(string|BackedEnum $feature): FeatureValue
     {
