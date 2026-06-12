@@ -242,6 +242,41 @@ describe('DatabaseDriver', function (): void {
             expect($driver->get('test-feature', userContext($user3)))->toBeTrue();
         });
 
+        test('sets many feature values for many contexts in one write query', function (): void {
+            $driver = createDriver();
+            $user1 = createUser('User 1');
+            $user2 = createUser('User 2');
+            $user3 = createUser('User 3');
+
+            $writeCount = 0;
+
+            DB::listen(function ($query) use (&$writeCount): void {
+                $sql = mb_strtolower($query->sql);
+
+                if (!str_contains($sql, 'insert') && !str_contains($sql, 'update')) {
+                    return;
+                }
+
+                ++$writeCount;
+            });
+
+            $driver->setMany([
+                'tier' => 'enterprise',
+                'plan' => 'enterprise',
+                'theme' => 'dark',
+            ], [
+                userContext($user1),
+                userContext($user2),
+                userContext($user3),
+            ]);
+
+            expect($writeCount)->toBe(1);
+
+            expect($driver->get('tier', userContext($user1)))->toBe('enterprise');
+            expect($driver->get('plan', userContext($user2)))->toBe('enterprise');
+            expect($driver->get('theme', userContext($user3)))->toBe('dark');
+        });
+
         test('deletes feature value from database', function (): void {
             // Arrange
             $driver = createDriver();

@@ -360,6 +360,67 @@ final class DatabaseDriver implements CanListStoredFeatures, Driver
     }
 
     /**
+     * Set many feature values for many contexts in a single bulk write.
+     *
+     * Performs a Cartesian product upsert across every feature/value pair and
+     * every provided context. This is optimized for high-volume rollouts where
+     * nested updateOrCreate loops would otherwise issue one write query per
+     * feature-context pair.
+     *
+     * @internal
+     *
+     * @param array<string, mixed>     $values   Feature name => value pairs
+     * @param array<int, TogglContext> $contexts Contexts to receive each feature
+     */
+    public function setMany(array $values, array $contexts): void
+    {
+        if ($values === [] || $contexts === []) {
+            return;
+        }
+
+        $records = [];
+
+        foreach ($values as $feature => $value) {
+            foreach ($contexts as $context) {
+                $records[] = [
+                    'name' => $feature,
+                    'context' => $context,
+                    'value' => $value,
+                ];
+            }
+        }
+
+        $existingKeys = $this->findExistingKeys($values, $contexts);
+        $inserts = [];
+
+        foreach ($records as $record) {
+            [$contextType, $contextId] = $this->extractContextMorph($record['context']);
+            $key = $this->recordKey($record['name'], $contextType, $contextId);
+
+            if (!isset($existingKeys[$key])) {
+                $inserts[] = $record;
+
+                continue;
+            }
+
+            $this->newQuery()
+                ->where('name', $record['name'])
+                ->where('context_type', $contextType)
+                ->where('context_id', $contextId)
+                ->update([
+                    'value' => json_encode($record['value'], flags: JSON_THROW_ON_ERROR),
+                    self::UPDATED_AT => Date::now(),
+                ]);
+        }
+
+        if ($inserts === []) {
+            return;
+        }
+
+        $this->newQuery()->insert($this->buildRecords($inserts));
+    }
+
+    /**
      * Set a feature flag's value for all contexts.
      *
      * Updates all existing database records for the given feature, setting them
@@ -547,6 +608,17 @@ final class DatabaseDriver implements CanListStoredFeatures, Driver
      */
     private function insertMany(array $inserts): bool
     {
+        return $this->newQuery()->insert($this->buildRecords($inserts));
+    }
+
+    /**
+     * Build database-ready feature records for inserts or upserts.
+     *
+     * @param  array<int, array{name: string, context: TogglContext, value: mixed}> $records
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildRecords(array $records): array
+    {
         $now = Date::now();
         $primaryKeyType = Config::get('toggl.primary_key_type', 'id');
 
@@ -556,26 +628,65 @@ final class DatabaseDriver implements CanListStoredFeatures, Driver
             PrimaryKeyType::from($primaryKeyType),
         );
 
-        $records = array_map(function (array $insert) use ($now, $primaryKey, $primaryKeyType): array {
-            $record = [
-                'name' => $insert['name'],
-                ...array_combine(['context_type', 'context_id'], $this->extractContextMorph($insert['context'])),
-                'value' => json_encode($insert['value'], flags: JSON_THROW_ON_ERROR),
+        return array_map(function (array $record) use ($now, $primaryKey, $primaryKeyType): array {
+            $payload = [
+                'name' => $record['name'],
+                ...array_combine(['context_type', 'context_id'], $this->extractContextMorph($record['context'])),
+                'value' => json_encode($record['value'], flags: JSON_THROW_ON_ERROR),
                 self::CREATED_AT => $now,
                 self::UPDATED_AT => $now,
             ];
 
-            // Add pre-generated ID for non-auto-incrementing primary keys
             if (!$primaryKey->isAutoIncrementing()) {
-                $record['id'] = PrimaryKeyGenerator::generate(
+                $payload['id'] = PrimaryKeyGenerator::generate(
                     PrimaryKeyType::from($primaryKeyType),
                 )->value;
             }
 
-            return $record;
-        }, $inserts);
+            return $payload;
+        }, $records);
+    }
 
-        return $this->newQuery()->insert($records);
+    /**
+     * Find existing non-scoped feature rows for the given feature/context pairs.
+     *
+     * @param  array<string, mixed>     $values
+     * @param  array<int, TogglContext> $contexts
+     * @return array<string, true>
+     */
+    private function findExistingKeys(array $values, array $contexts): array
+    {
+        $query = $this->newQuery()
+            ->select(['name', 'context_type', 'context_id'])
+            ->whereIn('name', array_keys($values))
+            ->whereNull('scope')
+            ->where(function (Builder $builder) use ($contexts): void {
+                foreach ($contexts as $context) {
+                    $builder->orWhere(function (Builder $nested) use ($context): void {
+                        $this->whereContextMatches($nested, $context);
+                    });
+                }
+            });
+
+        $keys = [];
+
+        foreach ($query->get() as $record) {
+            assert(is_string($record->name));
+            assert(is_string($record->context_type));
+            assert(is_int($record->context_id) || is_string($record->context_id));
+
+            $keys[$this->recordKey($record->name, $record->context_type, $record->context_id)] = true;
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Build a stable lookup key for a feature/context pair.
+     */
+    private function recordKey(string $name, string $contextType, int|string $contextId): string
+    {
+        return sprintf('%s|%s|%s', $name, $contextType, $contextId);
     }
 
     /**

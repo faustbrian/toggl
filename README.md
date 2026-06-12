@@ -17,6 +17,11 @@ A powerful Laravel feature flag package with conductor-based API, advanced strat
 composer require cline/toggl
 ```
 
+For high-volume rollouts on the database store, prefer the native
+`batch()` and `bulk()` APIs. Toggl now collapses large insert-only bulk
+activations into a single write query instead of issuing one write per
+feature-context pair.
+
 ## Documentation
 
 - **[Getting Started](DOCS.md#doc-docs-readme)** - Installation, configuration, and first steps

@@ -11,6 +11,7 @@ namespace Cline\Toggl\Conductors;
 
 use Cline\Toggl\FeatureManager;
 
+use function array_values;
 use function is_array;
 
 /**
@@ -69,12 +70,9 @@ final readonly class BulkValueConductor
      */
     public function for(mixed $context): void
     {
-        $contexts = is_array($context) ? $context : [$context];
+        /** @var array<int, mixed> $contexts */
+        $contexts = array_values(is_array($context) ? $context : [$context]);
 
-        foreach ($contexts as $c) {
-            foreach ($this->values as $feature => $value) {
-                $this->manager->for($c)->activate($feature, $value);
-            }
-        }
+        $this->manager->store()->setManyForContexts($this->values, $contexts);
     }
 }

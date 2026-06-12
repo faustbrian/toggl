@@ -557,6 +557,59 @@ final class Decorator implements CanListStoredFeatures, Driver, HasFlushableCach
     }
 
     /**
+     * Set many feature values for many contexts.
+     *
+     * Uses the database driver's bulk upsert path when available, otherwise
+     * falls back to repeated single-record writes while preserving cache and
+     * event behavior.
+     *
+     * @internal
+     *
+     * @param array<string, mixed> $values
+     * @param array<int, mixed>    $contexts
+     */
+    public function setManyForContexts(array $values, array $contexts): void
+    {
+        if ($values === [] || $contexts === []) {
+            return;
+        }
+
+        $resolvedValues = [];
+
+        foreach ($values as $feature => $value) {
+            $normalizedFeature = $this->normalizeFeature($feature);
+            $resolvedValues[$this->resolveFeature($normalizedFeature)] = $value;
+        }
+
+        $resolvedContexts = [];
+
+        foreach ($contexts as $context) {
+            $resolvedContexts[] = $this->resolveContext($context);
+        }
+
+        if ($this->driver instanceof DatabaseDriver) {
+            $this->driver->setMany($resolvedValues, $resolvedContexts);
+
+            foreach ($resolvedValues as $feature => $value) {
+                foreach ($resolvedContexts as $context) {
+                    $this->putInCache($feature, $context, $value);
+                    $this->dispatchFeatureEvent($feature, $context, $value);
+                }
+            }
+
+            return;
+        }
+
+        foreach ($resolvedValues as $feature => $value) {
+            foreach ($resolvedContexts as $context) {
+                $this->driver->set($feature, $context, $value);
+                $this->putInCache($feature, $context, $value);
+                $this->dispatchFeatureEvent($feature, $context, $value);
+            }
+        }
+    }
+
+    /**
      * Activate the feature for everyone.
      *
      * Sets the feature value globally across all contexts. This updates all existing

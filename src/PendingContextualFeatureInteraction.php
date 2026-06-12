@@ -22,6 +22,7 @@ use Cline\Toggl\ValueObjects\FeatureValue;
 use Closure;
 
 use function array_any;
+use function array_fill_keys;
 use function array_merge;
 use function array_values;
 use function collect;
@@ -589,8 +590,23 @@ final class PendingContextualFeatureInteraction
         $feature = $this->normalizeFeatureInput($feature);
         $features = is_array($feature) ? $feature : [$feature];
 
+        /** @var array<int, mixed> $contexts */
+        $contexts = array_values($this->getContexts());
+
+        if (!$this->explicitFeatureScope instanceof FeatureScope) {
+            $values = [];
+
+            foreach ($features as $featureName) {
+                $values[$featureName] = $value;
+            }
+
+            $this->driver->setManyForContexts($values, $contexts);
+
+            return;
+        }
+
         foreach ($features as $featureName) {
-            foreach ($this->getContexts() as $context) {
+            foreach ($contexts as $context) {
                 $this->driver->set($featureName, $this->wrapContextWithScope($context), $value);
             }
         }
@@ -610,21 +626,29 @@ final class PendingContextualFeatureInteraction
         $feature = $this->normalizeFeatureInput($feature);
         $features = is_array($feature) ? $feature : [$feature];
 
-        foreach ($features as $featureName) {
-            // Purge cache for feature when using scope (affects multiple contexts)
-            if ($this->explicitFeatureScope instanceof FeatureScope) {
-                $this->driver->purge([$featureName]);
+        /** @var array<int, mixed> $contexts */
+        $contexts = array_values($this->getContexts());
+
+        if (!$this->explicitFeatureScope instanceof FeatureScope) {
+            $values = [];
+
+            foreach ($features as $featureName) {
+                $values[$featureName] = false;
             }
 
-            foreach ($this->getContexts() as $context) {
+            $this->driver->setManyForContexts($values, $contexts);
+
+            return;
+        }
+
+        foreach ($features as $featureName) {
+            // Purge cache for feature when using scope (affects multiple contexts)
+            $this->driver->purge([$featureName]);
+
+            foreach ($contexts as $context) {
                 $wrappedContext = $this->wrapContextWithScope($context);
 
-                // If feature scope is set, delete the scoped record
-                if ($this->explicitFeatureScope instanceof FeatureScope) {
-                    $this->driver->delete($featureName, $wrappedContext);
-                } else {
-                    $this->driver->set($featureName, $wrappedContext, false);
-                }
+                $this->driver->delete($featureName, $wrappedContext);
             }
         }
     }
@@ -664,11 +688,9 @@ final class PendingContextualFeatureInteraction
     {
         $features = $this->driver->getGroup($name);
 
-        foreach ($features as $featureName) {
-            foreach ($this->getContexts() as $context) {
-                $this->driver->set($featureName, $context, true);
-            }
-        }
+        /** @var array<int, mixed> $contexts */
+        $contexts = array_values($this->getContexts());
+        $this->driver->setManyForContexts(array_fill_keys($features, true), $contexts);
     }
 
     /**
@@ -684,11 +706,9 @@ final class PendingContextualFeatureInteraction
     {
         $features = $this->driver->getGroup($name);
 
-        foreach ($features as $featureName) {
-            foreach ($this->getContexts() as $context) {
-                $this->driver->set($featureName, $context, false);
-            }
-        }
+        /** @var array<int, mixed> $contexts */
+        $contexts = array_values($this->getContexts());
+        $this->driver->setManyForContexts(array_fill_keys($features, false), $contexts);
     }
 
     /**

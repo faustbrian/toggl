@@ -8,6 +8,8 @@
  */
 
 use Cline\Toggl\Toggl;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Tests\Fixtures\User;
 
 /**
@@ -102,6 +104,41 @@ describe('Batch Activation Conductor', function (): void {
             expect(Toggl::for($user1)->value('plan'))->toBe('enterprise');
             expect(Toggl::for($user2)->value('tier'))->toBe('enterprise');
             expect(Toggl::for($user2)->value('plan'))->toBe('enterprise');
+        });
+
+        test('uses a single write query for many features across many contexts', function (): void {
+            $users = [
+                User::factory()->create(),
+                User::factory()->create(),
+                User::factory()->create(),
+            ];
+
+            Config::set('toggl.default', 'database');
+            Toggl::forgetDrivers();
+
+            $writeCount = 0;
+
+            DB::listen(function ($query) use (&$writeCount): void {
+                $sql = mb_strtolower($query->sql);
+
+                if (!str_contains($sql, 'insert') && !str_contains($sql, 'update')) {
+                    return;
+                }
+
+                ++$writeCount;
+            });
+
+            Toggl::batch()
+                ->activate(['tier', 'plan', 'theme'], 'enterprise')
+                ->for($users);
+
+            expect($writeCount)->toBe(1);
+
+            foreach ($users as $user) {
+                expect(Toggl::for($user)->value('tier'))->toBe('enterprise');
+                expect(Toggl::for($user)->value('plan'))->toBe('enterprise');
+                expect(Toggl::for($user)->value('theme'))->toBe('enterprise');
+            }
         });
     });
 

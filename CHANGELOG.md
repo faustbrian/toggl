@@ -10,3 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 - Added repository-level maintainer guidance in `AGENTS.md`.
+
+### Fixed
+- Collapse database-backed `batch()` and `bulk()` insert-only rollouts
+  into a single write query instead of issuing one write per
+  feature-context pair.

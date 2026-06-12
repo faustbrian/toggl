@@ -12,6 +12,7 @@ namespace Cline\Toggl\Conductors;
 use BackedEnum;
 use Cline\Toggl\FeatureManager;
 
+use function array_values;
 use function is_array;
 
 /**
@@ -72,18 +73,18 @@ final readonly class BatchOperationConductor
     public function for(mixed $contexts): void
     {
         $features = is_array($this->features) ? $this->features : [$this->features];
-        $contextArray = is_array($contexts) ? $contexts : [$contexts];
+        $values = [];
 
-        // Cartesian product: every feature × every context
+        /** @var array<int, mixed> $contextArray */
+        $contextArray = array_values(is_array($contexts) ? $contexts : [$contexts]);
+
         foreach ($features as $feature) {
-            foreach ($contextArray as $context) {
-                if ($this->operation === 'activate') {
-                    $this->manager->for($context)->activate($feature, $this->value);
-                } else {
-                    $this->manager->for($context)->deactivate($feature);
-                }
-            }
+            $values[$this->manager->name($feature)] = $this->operation === 'activate'
+                ? $this->value
+                : false;
         }
+
+        $this->manager->store()->setManyForContexts($values, $contextArray);
     }
 
     /**
